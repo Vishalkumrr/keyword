@@ -40,7 +40,6 @@ function App() {
   const [minTrafficPotential, setMinTrafficPotential] = useState('');
   const [maxTrafficPotential, setMaxTrafficPotential] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [matchParentKeyword, setMatchParentKeyword] = useState(false);
   const [includeFilter, setIncludeFilter] = useState<KeywordFilter>({
     type: 'all',
     keywords: []
@@ -189,11 +188,6 @@ function App() {
   };
 
   const filteredKeywords = keywords.filter(keyword => {
-    // Match Parent Keyword filter
-    if (matchParentKeyword && keyword.keyword !== keyword.parentKeyword) {
-      return false;
-    }
-
     const volume = parseInt(keyword.volume.replace(/,/g, '')) || 0;
     const minVol = minVolume ? parseInt(minVolume) : -Infinity;
     const maxVol = maxVolume ? parseInt(maxVolume) : Infinity;
@@ -314,18 +308,6 @@ function App() {
             <span className="text-gray-600">Average KD: </span>
             <span className="font-semibold">{averageKD}%</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="matchKeyword"
-              checked={matchParentKeyword}
-              onChange={(e) => setMatchParentKeyword(e.target.checked)}
-              className="rounded text-blue-500"
-            />
-            <label htmlFor="matchKeyword" className="text-gray-600">
-              Match Parent Keyword
-            </label>
-          </div>
         </div>
         <div>
           <input
@@ -345,7 +327,7 @@ function App() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-6 relative overflow-x-auto">
+      <div className="flex gap-3 mb-6 relative">
         {/* Volume Filter */}
         <button 
           onClick={() => {
@@ -720,7 +702,7 @@ function App() {
                   type="number"
                   value={maxCPC}
                   onChange={(e) => setMaxCPC(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounde d-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   placeholder="∞"
                   min="0"
                   step="0.01"
@@ -738,10 +720,8 @@ function App() {
                 </button>
                 <button
                   onClick={() => setShowCPCFilter(false)}
-                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Apply
-                </button>
+                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600" >
+                  Apply </button>
               </div>
             </div>
           </div>
@@ -996,73 +976,75 @@ function App() {
       </div>
 
       {/* Keywords Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Keyword
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Intent
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('volume')}
-              >
-                Volume {getSortIcon('volume')}
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('kd')}
-              >
-                KD% {getSortIcon('kd')}
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('cpc')}
-              >
-                CPC (USD) {getSortIcon('cpc')}
-              </th>
-              <th 
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('trafficPotential')}
-              >
-                Traffic Potential {getSortIcon('trafficPotential')}
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Parent Keyword
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedKeywords.map((keyword, index) => (
-              <tr key={index}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {keyword.keyword}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {keyword.intent}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {keyword.volume}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {keyword.kd}%
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ${keyword.cpc.toFixed(2)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {keyword.trafficPotential.toLocaleString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {keyword.parentKeyword}
-                </td>
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Keyword
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Intent
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 whitespace-nowrap"
+                  onClick={() => handleSort('volume')}
+                >
+                  Volume {getSortIcon('volume')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 whitespace-nowrap"
+                  onClick={() => handleSort('kd')}
+                >
+                  KD% {getSortIcon('kd')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 whitespace-nowrap"
+                  onClick={() => handleSort('cpc')}
+                >
+                  CPC (USD) {getSortIcon('cpc')}
+                </th>
+                <th 
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 whitespace-nowrap"
+                  onClick={() => handleSort('trafficPotential')}
+                >
+                  Traffic Potential {getSortIcon('trafficPotential')}
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Parent Keyword
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {sortedKeywords.map((keyword, index) => (
+                <tr key={index}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {keyword.keyword}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {keyword.intent}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {keyword.volume}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {keyword.kd}%
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${keyword.cpc.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {keyword.trafficPotential.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {keyword.parentKeyword}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
